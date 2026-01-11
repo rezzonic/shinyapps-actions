@@ -3,14 +3,6 @@ FROM debian:trixie
 # based on https://hub.docker.com/_/r-base
 # and https://github.com/qwert666/shinyapps-actions
 
-## Set a default user. Available via runtime flag `--user docker`
-## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
-## User should also have & own a home directory (for rstudio or linked volumes to work properly).
-RUN useradd docker \
-	&& mkdir /home/docker \
-	&& chown docker:docker /home/docker \
-	&& addgroup docker staff
-
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ed \
@@ -20,7 +12,17 @@ RUN apt-get update \
 		wget \
 		ca-certificates \
 		fonts-texgyre \
+		adduser \
 	&& rm -rf /var/lib/apt/lists/*
+
+## Set a default user. Available via runtime flag `--user docker`
+## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
+## User should also have & own a home directory (for rstudio or linked volumes to work properly).
+RUN useradd docker \
+	&& mkdir /home/docker \
+	&& chown docker:docker /home/docker \
+	&& addgroup docker staff
+
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
