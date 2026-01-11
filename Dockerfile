@@ -1,6 +1,7 @@
-FROM debian:bullseye
+FROM debian:trixie
 
 # based on https://hub.docker.com/_/r-base
+# and https://github.com/qwert666/shinyapps-actions
 
 ## Set a default user. Available via runtime flag `--user docker`
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
@@ -31,7 +32,7 @@ ENV LANG en_US.UTF-8
 
 RUN echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90local-no-recommends
 
-ENV R_BASE_VERSION 4.0.4
+ENV R_BASE_VERSION 4.5.1
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 
