@@ -13,6 +13,9 @@ RUN apt-get update \
 		ca-certificates \
 		fonts-texgyre \
 		adduser \
+		gpg \
+		gpg-agent \
+		dirmngr \
 	&& rm -rf /var/lib/apt/lists/*
 
 ## Set a default user. Available via runtime flag `--user docker`
@@ -21,7 +24,7 @@ RUN apt-get update \
 RUN useradd docker \
 	&& mkdir /home/docker \
 	&& chown docker:docker /home/docker \
-	&& addgroup docker staff
+	&& adduser docker staff
 
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
@@ -34,19 +37,24 @@ ENV LANG en_US.UTF-8
 
 RUN echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90local-no-recommends
 
-ENV R_BASE_VERSION 4.5.1
+RUN echo 'deb http://cloud.r-project.org/bin/linux/debian trixie-cran40/' >> /etc/apt/sources.list
+
+
+RUN gpg --keyserver keyserver.ubuntu.com --recv-key '95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7'
+RUN gpg --armor --export '95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7' | tee /etc/apt/trusted.gpg.d/cran_debian_key.asc
+
+ENV R_BASE_VERSION 4.5
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 
 RUN apt-get update \
         && apt-get install -y --no-install-recommends \
-                gcc-9-base \
                 libopenblas0-pthread \
 		littler \
                 r-cran-littler \
-		r-base=${R_BASE_VERSION}-* \
-		r-base-dev=${R_BASE_VERSION}-* \
-		r-recommended=${R_BASE_VERSION}-* \
+		r-base=${R_BASE_VERSION}.* \
+		r-base-dev=${R_BASE_VERSION}.* \
+		r-recommended=${R_BASE_VERSION}.* \
 	&& ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
 	&& ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
 	&& ln -s /usr/lib/R/site-library/littler/examples/installBioc.r /usr/local/bin/installBioc.r \
